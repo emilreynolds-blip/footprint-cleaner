@@ -1,0 +1,23 @@
+name: Build Windows Installer
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: powershell -ExecutionPolicy Bypass -File build_windows.ps1
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build installer
+        run: iscc installer.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FootprintCleaner-Windows-Installer
+          path: installer-output/FootprintCleaner-Setup-0.1.0.exe
+          if-no-files-found: error
